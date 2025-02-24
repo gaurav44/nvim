@@ -36,3 +36,5 @@ vim.keymap.set("i", "<C-w>", function()
     vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-w>", true, true, true), "n", false)
   end
 end, {noremap = true, silent = true})
+
+vim.opt.clipboard = "unnamedplus"
