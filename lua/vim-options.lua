@@ -22,3 +22,17 @@ end
 vim.keymap.set('n', '<leader>tt', ToggleTheme, {noremap = true, silent=true, desc = "Toggle between Gruvbox and catpuccin"})
 
 vim.o.cursorline=true
+
+vim.keymap.set("i", "<C-w>", function()
+  local col = vim.api.nvim_win_get_cursor(0)[2];
+  local line = vim.api.nvim_get_current_line()
+
+  local before_cursor = col > 0 and line:sub(col, col):match("[%w_]")
+  local after_cursor = line:sub(col + 1, col + 1):match("[%w_]")
+  
+  if before_cursor or after_cursor then
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-o>dw", true, true, true), "n", false)
+  else
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-w>", true, true, true), "n", false)
+  end
+end, {noremap = true, silent = true})
