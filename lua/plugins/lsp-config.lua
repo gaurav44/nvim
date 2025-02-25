@@ -9,7 +9,7 @@ return {
     "williamboman/mason-lspconfig.nvim",
     config = function()
       require("mason-lspconfig").setup({
-        ensure_installed = { "lua_ls", "clangd" },
+        ensure_installed = { "lua_ls", "clangd", "cmake" },  -- Add "cmake" here
       })
     end,
   },
@@ -23,14 +23,21 @@ return {
       })
       lspconfig.clangd.setup({
         capabilities = capabilities,
+        cmd = {"clangd", "--clang-tidy", "--enable-config"},
       })
+
+      -- Add CMake language server configuration
+      lspconfig.cmake.setup({
+        capabilities = capabilities,
+      })
+
       vim.diagnostic.config({
         virtual_text = false,
       })
 
       -- Show line diagnostics automatically in hover window
-      --vim.o.updatetime = 5
-      --vim.cmd([[autocmd CursorHold,CursorHoldI * lua vim.diagnostic.open_float(nil, {focus=false})]])
+      -- vim.o.updatetime = 5
+      -- vim.cmd([[autocmd CursorHold,CursorHoldI * lua vim.diagnostic.open_float(nil, {focus=false})]])
 
       vim.keymap.set('n', '<leader>gd', vim.lsp.buf.definition, {})
       vim.keymap.set('n', '<leader>gt', vim.lsp.buf.type_definition, {})
