@@ -58,17 +58,17 @@ return {
         dapui.close()
       end
 
-      -- Keybindings for Debugging (VSCode-like)
-      vim.keymap.set("n", "<F5>", dap.continue, { desc = "Start/Continue Debugging" })
-      vim.keymap.set("n", "<F10>", dap.step_over, { desc = "Step Over" })
-      vim.keymap.set("n", "<F11>", dap.step_into, { desc = "Step Into" })
-      vim.keymap.set("n", "<F12>", dap.step_out, { desc = "Step Out" })
-      vim.keymap.set("n", "<Leader>db", dap.toggle_breakpoint, { desc = "Toggle Breakpoint" })
-      vim.keymap.set("n", "<Leader>dc", function()
-        dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
-      end, { desc = "Set Conditional Breakpoint" })
-      vim.keymap.set("n", "<Leader>dr", dap.repl.open, { desc = "Open Debug REPL" })
-      vim.keymap.set("n", "<Leader>du", dapui.toggle, { desc = "Toggle Debug UI" })
+      -- Keybindings for Debugging (commented out as they're now in which-key.nvim)
+      -- vim.keymap.set("n", "<F5>", dap.continue, { desc = "Start/Continue Debugging" })
+      -- vim.keymap.set("n", "<F10>", dap.step_over, { desc = "Step Over" })
+      -- vim.keymap.set("n", "<F11>", dap.step_into, { desc = "Step Into" })
+      -- vim.keymap.set("n", "<F12>", dap.step_out, { desc = "Step Out" })
+      -- vim.keymap.set("n", "<Leader>db", dap.toggle_breakpoint, { desc = "Toggle Breakpoint" })
+      -- vim.keymap.set("n", "<Leader>dc", function()
+      --   dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
+      -- end, { desc = "Set Conditional Breakpoint" })
+      -- vim.keymap.set("n", "<Leader>dr", dap.repl.open, { desc = "Open Debug REPL" })
+      -- vim.keymap.set("n", "<Leader>du", dapui.toggle, { desc = "Toggle Debug UI" })
     end
   }
 }

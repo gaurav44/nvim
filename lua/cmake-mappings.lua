@@ -45,7 +45,7 @@ function M.setup()
     end)
   end, { noremap = true, silent = true })
 
-  -- Run Build using the selected preset
+  -- Run Build using release mode 
   vim.keymap.set("n", "<leader>br", function()
     -- Check if a shell pane exists
     local check_pane = io.popen('tmux list-panes -F "#{pane_current_command}" | grep -q "zsh\\|bash\\|fish" && echo "exists"')

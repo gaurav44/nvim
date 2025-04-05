@@ -282,10 +282,10 @@ function M.setup()
   vim.api.nvim_create_user_command('GTestFuzzyFind', M.fuzzy_select_gtest_case, {})
   vim.api.nvim_create_user_command('GTestRunAllExceptDebug', M.run_all_tests_except_debug, {})
   vim.api.nvim_create_user_command('GTestRunOnlyDebug', M.run_only_debug_tests, {})
-  -- Keybindings
-  vim.keymap.set('n', '<leader>tc', ":GTestFuzzyFind<CR>", { desc = "Select GTest Case" })
-  vim.keymap.set('n', '<leader>ta', ":GTestRunAllExceptDebug<CR>", { desc = "Run All Tests Except Debug" })
-  vim.keymap.set('n', '<leader>td', ":GTestRunOnlyDebug<CR>", { desc = "Run Only Debug Tests" })
+  -- Keybindings (commented out as they're now in which-key.nvim)
+  -- vim.keymap.set('n', '<leader>tc', ":GTestFuzzyFind<CR>", { desc = "Select GTest Case" })
+  -- vim.keymap.set('n', '<leader>ta', ":GTestRunAllExceptDebug<CR>", { desc = "Run All Tests Except Debug" })
+  -- vim.keymap.set('n', '<leader>td', ":GTestRunOnlyDebug<CR>", { desc = "Run Only Debug Tests" })
 end
 
 return M
