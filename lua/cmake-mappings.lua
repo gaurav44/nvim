@@ -1,33 +1,13 @@
 local M = {}
 
 function M.setup()
-  local success, toggleterm = pcall(require, "toggleterm.terminal")
-  if not success then
-    print("Error: toggleterm not found. Please make sure it's installed.")
-    return
-  end
-
-  local build_term = toggleterm.Terminal:new({
-    hidden = false,
-    direction = "float",
-    close_on_exit = false,
-    env = {
-      CLICOLOR = "1",
-      CLICOLOR_FORCE = "1",
-      GTEST_COLOR = "1",
-      CMAKE_COLOR_DIAGNOSTICS = "1",
-      GNUMAKEFLAGS = "--output-sync=target"
-    }
-  })
-
-  -- Open persistent terminal
+  -- Open a persistent terminal and create necessary directories
   vim.keymap.set("n", "<leader>tb", function()
-    build_term:open()
-    build_term:send("mkdir -p build install && clear")
+    vim.cmd('silent !tmux split-window -h "mkdir -p build install && clear"')
   end, { noremap = true, silent = true })
 
   -- Select and use a CMake preset
-  vim.keymap.set("n", "<leader>tp", function()
+  vim.keymap.set("n", "<leader>cm", function()
     -- Get available presets
     local handle = io.popen("cmake --list-presets")
     local result = handle:read("*a")
@@ -49,21 +29,57 @@ function M.setup()
     -- Ask user to select a preset
     vim.ui.select(presets, { prompt = "Select CMake Preset" }, function(choice)
       if choice then
-        build_term:open()
-        build_term:send("cmake --preset " .. choice)
+        -- Check if a shell pane exists
+        local check_pane = io.popen('tmux list-panes -F "#{pane_current_command}" | grep -q "zsh\\|bash\\|fish" && echo "exists"')
+        local pane_exists = check_pane:read("*a")
+        check_pane:close()
+
+        if pane_exists:match("exists") then
+          -- Send command to the existing shell pane
+          vim.cmd('silent !tmux send-keys -t "{last}" "cmake --preset ' .. choice .. '" Enter')
+        else
+          -- Create a new split and run the command
+          vim.cmd('silent !tmux split-window -h "cmake --preset ' .. choice .. '; exec $SHELL"')
+        end
       end
     end)
   end, { noremap = true, silent = true })
 
   -- Run Build using the selected preset
-  vim.keymap.set("n", "<leader>tm", function()
-    build_term:open()
-    build_term:send("cmake --build build --parallel")
+  vim.keymap.set("n", "<leader>br", function()
+    -- Check if a shell pane exists
+    local check_pane = io.popen('tmux list-panes -F "#{pane_current_command}" | grep -q "zsh\\|bash\\|fish" && echo "exists"')
+    local pane_exists = check_pane:read("*a")
+    check_pane:close()
+
+    if pane_exists:match("exists") then
+      -- Send command to the existing shell pane
+      vim.cmd('silent !tmux send-keys -t "{last}" "cmake --build build --parallel 36" Enter')
+    else
+      -- Create a new split and run the command
+      vim.cmd('silent !tmux split-window -h "cmake --build build --parallel 36; exec $SHELL"')
+    end
   end, { noremap = true, silent = true })
 
-  -- Close terminal with 'q'
-  vim.keymap.set("n", "q", function()
-    build_term:close()
+  --Run Build in Debug mode using the selected preset
+  vim.keymap.set("n", "<leader>bd", function()
+    --Check if a shell pane exists
+    local check_pane = io.popen('tmux list-panes -F "#{pane_current_command}" | grep -q "zsh\\|bash\\|fish" && echo "exists"')
+    local pane_exists = check_pane:read("*a")
+    check_pane:close()
+
+    if pane_exists:match("exists") then 
+      --Send command to the existing shell pane
+      vim.cmd('silent !tmux send-keys -t "{last}" "cmake --build build-debug --parallel 36" Enter')
+    else
+      --Create a new split and run the command
+      vim.cmd('silent !tmux split-window -h "cmake --build build-debug --parallel 36; exec $SHELL"')
+    end
+  end, {noremap = true, silent = true})
+
+  -- Close terminal with 'q' (for the terminal pane in tmux)
+  vim.keymap.set("t", "q", function()
+    vim.cmd('silent !tmux kill-pane')
   end, { noremap = true, silent = true })
 end
 
