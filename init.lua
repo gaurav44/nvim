@@ -17,7 +17,7 @@ require("vim-options")
 require("lazy").setup("plugins")
 require("cmake-mappings").setup()
 require("vim-gtest").setup()
-
+--vim.api.nvim_set_keymap('n', '<Leader>rr', ':luafile $MYVIMRC<CR>', { noremap = true, silent = true })
 
 
 

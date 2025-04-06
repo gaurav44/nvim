@@ -22,6 +22,17 @@ return {
             return select.visual(source)
           end,
         },
+        TutorMotion = {
+          prompt = [[
+            You are a Neovim tutor. Based on the user's description, suggest the appropriate:
+            - Vim motion or command
+            - Telescope action (with keybinding if known)
+            - LSP command (with keybinding if known)
+            
+            If multiple options are possible, explain each briefly.
+            User's request:
+            ]],
+        },
         -- New prompts from the first configuration
         Explain = "Please explain how the following code works.",
         Review = "Please review the following code and provide suggestions for improvement.",
@@ -116,6 +127,21 @@ return {
           end
         end,
       })
+
+      vim.api.nvim_create_user_command("CopilotTutor", function()
+        local input = vim.fn.input("What do you want to do in Neovim? ")
+        if input ~= "" then
+            chat.ask(opts.prompts.TutorMotion.prompt .. input, {
+            window = {
+              layout = "float",
+              relative = "cursor",
+              width = 1,
+              height = 0.4,
+              row = 1,
+            },
+          })
+        end
+      end, {})
     end,
     keys = {
       -- All keybindings converted to <leader>a format
@@ -128,6 +154,7 @@ return {
       { "<leader>zt", "<cmd>CopilotChatTests<cr>", desc = "CopilotChat - Generate tests" },
       { "<leader>zj", "<cmd>CopilotChatCommit<cr>", mode = "n", desc = "CopilotChat - Generate Commit Message" },
       { "<leader>zJ", "<cmd>CopilotChatCommit<cr>", mode = "v", desc = "CopilotChat - Generate Commit Message for Selection" },
+      { "<leader>zT", "<cmd>CopilotTutor<cr>", desc = "Copilot Tutor - Ask about motions or commands" },
       
       -- New keybindings from the first configuration
       { "<leader>ap", function() 

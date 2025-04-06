@@ -40,6 +40,8 @@ vim.keymap.set("i", "<C-w>", function()
 end, { noremap = true, silent = true })
 
 vim.opt.clipboard = "unnamedplus"
+vim.api.nvim_set_keymap('n', '<leader>nh', ':nohlsearch<CR>', { noremap = true, silent = true })
+
 
 -- Quickfix navigation keybindings now in which-key.nvim
 -- vim.keymap.set("n", "B", ":cprev<CR>", { noremap = true, silent = true, desc = "Previous item in Quickfix" })
