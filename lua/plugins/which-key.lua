@@ -106,9 +106,9 @@ return {
 				{
 					"<leader>fs",
 					function()
-						require("telescope.builtin").grep_string()
+						require("telescope.builtin").live_grep({ search_dirs = { vim.fn.getcwd() } })
 					end,
-					desc = "🔎 Live Grep",
+					desc = "🔎 Live Grep in Current Folder",
 				},
 				{
 					"<leader>fb",
@@ -123,6 +123,13 @@ return {
 						require("telescope.builtin").current_buffer_fuzzy_find()
 					end,
 					desc = "🔍 Search in Current Buffer",
+				},
+				{
+					"<leader>fm",
+					function()
+						require("telescope.builtin").marks()
+					end,
+					desc = "🔖 Find Marks",
 				},
 
 				-- LSP mappings
