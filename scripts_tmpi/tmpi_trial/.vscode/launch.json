@@ -1,0 +1,71 @@
+{
+  "configurations": [
+    {
+      "type": "cppdbg",
+      "request": "attach",
+      "processId" : "${command:pickProcess}",
+      "name": "MPI debug attach",
+      "program": "/home/gaurav/Desktop/trials/tmpi_trial/hello_mpi",
+      "args": [   ],
+      "cwd": "/home/gaurav/Desktop/trials/tmpi_trial",
+      "stopAtEntry": true,
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    },
+    {
+      "type": "cppdbg",
+      "request": "launch",
+      // "processId" : "${command:pickProcess}",
+      "name": "MPI debug launch",
+      "program": "/home/gaurav/Desktop/trials/tmpi_trial/hello_mpi",
+      "args": [   ],
+      "cwd": "/home/gaurav/Desktop/trials/tmpi_trial",
+      "stopAtEntry": true,
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "start-mpi-processes"
+    },
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "cppdbg",
+      "request": "launch",
+      "args": [],
+      "stopAtEntry": true,
+      "externalConsole": false,
+      "cwd": "/home/gaurav/Desktop/trials/tmpi_trial",
+      "program": "/home/gaurav/Desktop/trials/tmpi_trial/build/Debug/outDebug",
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "executableName",
+      "description": "Name of your executable"
+    }
+  ]
+}

@@ -131,6 +131,13 @@ return {
 					end,
 					desc = "🔖 Find Marks",
 				},
+				{
+					"<leader>fM",
+					function()
+						require("telescope.builtin").marks({ sorter = require('telescope.sorters').get_fzy_sorter() })
+					end,
+					desc = "🔖 Find Marks (with FZY sorter)",
+				},
 
 				-- LSP mappings
 				{ "<leader>g", group = "🛠️ LSP" },

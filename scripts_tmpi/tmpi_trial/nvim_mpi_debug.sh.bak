@@ -1,0 +1,226 @@
+#!/bin/bash
+
+# Path to PID file and launch.json
+pid_file="/home/gaurav/Desktop/trials/tmpi_trial/hello_mpi_pids.txt"
+launch_json="/home/gaurav/Desktop/trials/tmpi_trial/.vscode/launch.json"
+
+# Check if the PID file exists
+if [ ! -f "$pid_file" ]; then
+    echo "Error: PID file not found at $pid_file"
+    echo "Please run start_mpi_processes.sh first to generate the file."
+    exit 1
+fi
+
+# List available PIDs
+echo "Available MPI processes:"
+cat "$pid_file" | nl
+
+# Check if auto mode is enabled
+if [ ! -z "$NVIM_MPI_AUTO" ] && [ ! -z "$MPI_PROCESS_NUM" ]; then
+    process_num=$MPI_PROCESS_NUM
+    echo "Auto-selected process number: $process_num"
+else
+# Check if auto mode is enabled
+if [ ! -z "$NVIM_MPI_AUTO" ] && [ ! -z "$MPI_PROCESS_NUM" ]; then
+    process_num=$MPI_PROCESS_NUM
+    echo "Auto-selected process number: $process_num"
+else
+# Check if auto mode is enabled
+if [ ! -z "$NVIM_MPI_AUTO" ] && [ ! -z "$MPI_PROCESS_NUM" ]; then
+    process_num=$MPI_PROCESS_NUM
+    echo "Auto-selected process number: $process_num"
+else
+# Check if auto mode is enabled
+if [ ! -z "$NVIM_MPI_AUTO" ] && [ ! -z "$MPI_PROCESS_NUM" ]; then
+    process_num=$MPI_PROCESS_NUM
+    echo "Auto-selected process number: $process_num"
+else
+# Check if auto mode is enabled
+if [ ! -z "$NVIM_MPI_AUTO" ] && [ ! -z "$MPI_PROCESS_NUM" ]; then
+    process_num=$MPI_PROCESS_NUM
+    echo "Auto-selected process number: $process_num"
+else
+# Check if auto mode is enabled
+if [ ! -z "$NVIM_MPI_AUTO" ] && [ ! -z "$MPI_PROCESS_NUM" ]; then
+    process_num=$MPI_PROCESS_NUM
+    echo "Auto-selected process number: $process_num"
+else
+# Check if auto mode is enabled
+if [ ! -z "$NVIM_MPI_AUTO" ] && [ ! -z "$MPI_PROCESS_NUM" ]; then
+    process_num=$MPI_PROCESS_NUM
+    echo "Auto-selected process number: $process_num"
+else
+    # Ask which process to debug
+    read -p "Enter the number of the process to debug (1-$(wc -l < "$pid_file")): " process_num
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+
+# Get the selected PID
+selected_pid=$(sed -n "${process_num}p" "$pid_file")
+if [ -z "$selected_pid" ]; then
+    echo "Error: Invalid process number"
+    exit 1
+fi
+
+# Verify that the process is still running
+if ! ps -p $selected_pid > /dev/null; then
+    echo "Error: Process with PID $selected_pid is no longer running"
+    exit 1
+fi
+
+echo "Found active process with PID: $selected_pid"
+
+# Create a simple debugging configuration file
+debug_config="/home/gaurav/Desktop/trials/tmpi_trial/debug_config.json"
+cat > "$debug_config" << EOL
+{
+  "configurations": [
+    {
+      "type": "cppdbg",
+      "request": "attach",
+      "name": "MPI Process Attach",
+      "processId": ${selected_pid},
+      "program": "/home/gaurav/Desktop/trials/tmpi_trial/hello_mpi",
+      "cwd": "/home/gaurav/Desktop/trials/tmpi_trial",
+      "stopAtEntry": true,
+      "setupCommands": [
+        {
+          "text": "-enable-pretty-printing",
+          "description": "Enable pretty printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}
+EOL
+
+# Create a temporary Vim script file that Neovim can source
+nvim_script="/home/gaurav/Desktop/trials/tmpi_trial/attach_debugger.vim"
+cat > "$nvim_script" << EOL
+" Check if we're inside Neovim
+if has('nvim')
+  " Attach to the MPI process using nvim-dap
+  lua << EOF
+  local pid = ${selected_pid}
+  print("Attaching to MPI process with PID: " .. pid)
+  
+  -- Use the existing Neovim DAP setup
+  local status_ok, dap = pcall(require, "dap")
+  if not status_ok then
+    print("ERROR: nvim-dap is not installed or not configured properly")
+    print("Please make sure nvim-dap is installed in your Neovim configuration")
+    return
+  end
+  
+  -- Load the debug configuration
+  local config_file = io.open("${debug_config}", "r")
+  if not config_file then
+    print("ERROR: Could not open debug configuration file")
+    return
+  end
+  
+  local config_content = config_file:read("*all")
+  config_file:close()
+  
+  local config = vim.json.decode(config_content)
+  
+  -- Set the configuration
+  if config and config.configurations and config.configurations[1] then
+    -- Configure for C/C++
+    dap.configurations.cpp = dap.configurations.cpp or {}
+    table.insert(dap.configurations.cpp, config.configurations[1])
+    dap.configurations.c = dap.configurations.c or {}
+    table.insert(dap.configurations.c, config.configurations[1])
+    
+    -- Start debugging session
+    vim.defer_fn(function()
+      dap.run(config.configurations[1])
+    end, 500)
+  end
+EOF
+else
+  echo "This script requires Neovim"
+endif
+
+" Create commands to modify the volatile int debug flag
+command! -nargs=1 SetDebugFlag lua require('dap').eval('debug_flag = <args>')
+command! ContinueDebug lua require('dap').eval('debug_flag = 1')
+command! PauseDebug lua require('dap').eval('debug_flag = 0')
+
+" Automatically toggle the DAP UI when starting
+lua << EOF
+vim.defer_fn(function()
+  -- Execute the DAP UI toggle command (equivalent to <leader>du)
+  vim.cmd('lua require("dapui").toggle()')
+  print("DAP UI automatically toggled")
+end, 1000)
+EOF
+
+" Print instructions for using the commands
+lua << EOF
+print("----------------------------------------------------------------")
+print("DEBUGGING INSTRUCTIONS:")
+print("After the debugger attaches, you can use the following commands:")
+print("  :SetDebugFlag 1    # Set debug flag to specific value")
+print("  :ContinueDebug     # Set flag to 1 to continue execution")
+print("  :PauseDebug        # Set flag to 0 to pause at next checkpoint")
+print("----------------------------------------------------------------")
+EOF
+EOL
+
+# Add information about volatile int approach
+echo "This debugger uses a volatile int approach."
+echo "After attaching to the debugger, use these commands in Neovim:"
+echo "  :SetDebugFlag 1    # Set debug flag to specific value"
+echo "  :ContinueDebug     # Set flag to 1 to continue execution"
+echo "  :PauseDebug        # Set flag to 0 to pause at next checkpoint"
+echo ""
+
+# Launch Neovim with our script if requested
+# In auto mode, always launch Neovim
+if [ ! -z "$NVIM_MPI_AUTO" ]; then
+    nvim -S "$nvim_script" "/home/gaurav/Desktop/trials/tmpi_trial/hello_mpi.cpp"
+else
+# In auto mode, always launch Neovim
+if [ ! -z "$NVIM_MPI_AUTO" ]; then
+    nvim -S "$nvim_script" "/home/gaurav/Desktop/trials/tmpi_trial/hello_mpi.cpp"
+else
+# In auto mode, always launch Neovim
+if [ ! -z "$NVIM_MPI_AUTO" ]; then
+    nvim -S "$nvim_script" "/home/gaurav/Desktop/trials/tmpi_trial/hello_mpi.cpp"
+else
+# In auto mode, always launch Neovim
+if [ ! -z "$NVIM_MPI_AUTO" ]; then
+    nvim -S "$nvim_script" "/home/gaurav/Desktop/trials/tmpi_trial/hello_mpi.cpp"
+else
+# In auto mode, always launch Neovim
+if [ ! -z "$NVIM_MPI_AUTO" ]; then
+    nvim -S "$nvim_script" "/home/gaurav/Desktop/trials/tmpi_trial/hello_mpi.cpp"
+else
+# In auto mode, always launch Neovim
+if [ ! -z "$NVIM_MPI_AUTO" ]; then
+    nvim -S "$nvim_script" "/home/gaurav/Desktop/trials/tmpi_trial/hello_mpi.cpp"
+else
+# In auto mode, always launch Neovim
+if [ ! -z "$NVIM_MPI_AUTO" ]; then
+    nvim -S "$nvim_script" "/home/gaurav/Desktop/trials/tmpi_trial/hello_mpi.cpp"
+else
+    read -p "Do you want to launch a new Neovim instance now? (y/n) " launch_new
+    if [[ "$launch_new" == "y" || "$launch_new" == "Y" ]]; then
+        nvim -S "$nvim_script" "/home/gaurav/Desktop/trials/tmpi_trial/hello_mpi.cpp"
+    fi
+fi
+fi
+fi
+fi
+fi
+fi
+fi
+
+echo "Debug session ended"

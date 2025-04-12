@@ -1,0 +1,20 @@
+{
+  "configurations": [
+    {
+      "type": "cppdbg",
+      "request": "attach",
+      "name": "MPI Process Attach",
+      "processId": 645129,
+      "program": "/home/gaurav/Desktop/trials/tmpi_trial/hello_mpi",
+      "cwd": "/home/gaurav/Desktop/trials/tmpi_trial",
+      "stopAtEntry": true,
+      "setupCommands": [
+        {
+          "text": "-enable-pretty-printing",
+          "description": "Enable pretty printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}

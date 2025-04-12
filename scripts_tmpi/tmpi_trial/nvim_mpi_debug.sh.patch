@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Apply patch to the original script
+original_script="/home/gaurav/Desktop/trials/tmpi_trial/nvim_mpi_debug.sh"
+
+# Make a backup
+cp "$original_script" "${original_script}.bak"
+
+# Apply the modifications
+sed -i '/ Ask which process to debug/,/read -p "Enter the number of the process to debug (1-$(wc -l < "$pid_file")): " process_num/c\
+# Check if auto mode is enabled\
+if [ ! -z "$NVIM_MPI_AUTO" ] && [ ! -z "$MPI_PROCESS_NUM" ]; then\
+    process_num=$MPI_PROCESS_NUM\
+    echo "Auto-selected process number: $process_num"\
+else\
+    # Ask which process to debug\
+    read -p "Enter the number of the process to debug (1-$(wc -l < "$pid_file")): " process_num\
+fi' "$original_script"
+
+# Skip the prompt at the end
+sed -i '/read -p "Do you want to launch a new Neovim instance now? (y\/n) " launch_new/,/fi/c\
+# In auto mode, always launch Neovim\
+if [ ! -z "$NVIM_MPI_AUTO" ]; then\
+    nvim -S "$nvim_script" "/home/gaurav/Desktop/trials/tmpi_trial/hello_mpi.cpp"\
+else\
+    read -p "Do you want to launch a new Neovim instance now? (y/n) " launch_new\
+    if [[ "$launch_new" == "y" || "$launch_new" == "Y" ]]; then\
+        nvim -S "$nvim_script" "/home/gaurav/Desktop/trials/tmpi_trial/hello_mpi.cpp"\
+    fi\
+fi' "$original_script"
+
+echo "Original script patched successfully"

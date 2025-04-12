@@ -28,20 +28,63 @@ return {
         command = '/home/gaurav/cpptools/extension/debugAdapters/bin/OpenDebugAD7',
       }
 
+      -- Configuration for launching MPI program (rank 0)
       dap.configurations.cpp = {
         {
-          name = "Launch",
-          type = "cppdbg",  -- Changed to match adapter name
+          name = "MPI Debug DAP Attach",
+          type = "cppdbg",
           request = "launch",
-          program = debug_config.program or function()
-            return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
-          end,
-          args = debug_config.args or {},
-          cwd = debug_config.cwd or "${workspaceFolder}",
-          stopOnEntry = false,
-          runInTerminal = false
+          program = "/home/gaurav/Desktop/trials/tmpi_trial/hello_mpi", -- Update path to your program
+          args = { }, -- Add any program arguments here
+          cwd = "/home/gaurav/Desktop/trials/tmpi_trial/",
+          stopAtEntry = true,
+          externalConsole = false,
+          MIMode = "gdb",
+          miDebuggerArgs = "",
+          setupCommands = {
+            {
+              text = "-enable-pretty-printing",
+              description = "enable pretty printing",
+              ignoreFailures = false
+            },
+          },
+        },
+
+        -- Configuration for attaching to other MPI ranks
+        {
+          name = "MPI Attach",
+          type = "cppdbg",
+          request = "attach",
+          processId = "${command:pickProcess}",
+          program = "/home/gaurav/Desktop/trials/tmpi_trial/hello_mpi", -- Update path to your program
+          cwd = "/home/gaurav/Desktop/trials/tmpi_trial/",
+          MIMode = "gdb",
+          stopAtEntry = true,
+          setupCommands = {
+            {
+              text = "-enable-pretty-printing",
+              description = "enable pretty printing",
+              ignoreFailures = false
+            },
+          },
         }
       }
+      -- Add the same configurations for C
+      dap.configurations.c = dap.configurations.cpp
+      -- dap.configurations.cpp = {
+      --   {
+      --     name = "Launch",
+      --     type = "cppdbg",  -- Changed to match adapter name
+      --     request = "launch",
+      --     program = debug_config.program or function()
+      --       return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+      --     end,
+      --     args = debug_config.args or {},
+      --     cwd = debug_config.cwd or "${workspaceFolder}",
+      --     stopOnEntry = false,
+      --     runInTerminal = false
+      --   }
+      -- }
 
       -- DAP UI Setup
       dapui.setup()
