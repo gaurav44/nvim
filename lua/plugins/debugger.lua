@@ -25,7 +25,7 @@ return {
       dap.adapters.cppdbg = {
         id = 'cppdbg',
         type = 'executable',
-        command = '/home/gaurav/cpptools/extension/debugAdapters/bin/OpenDebugAD7',
+        command = '/home/gauravgokhale/cppdbg/extension/debugAdapters/bin/OpenDebugAD7',
       }
 
       -- Configuration for launching MPI program (rank 0)

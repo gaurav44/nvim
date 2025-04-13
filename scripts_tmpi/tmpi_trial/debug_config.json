@@ -4,9 +4,9 @@
       "type": "cppdbg",
       "request": "attach",
       "name": "MPI Process Attach",
-      "processId": 645129,
-      "program": "/home/gaurav/Desktop/trials/tmpi_trial/hello_mpi",
-      "cwd": "/home/gaurav/Desktop/trials/tmpi_trial",
+      "processId": 13173,
+      "program": "/home/gauravgokhale/.config/nvim/scripts_tmpi/tmpi_trial/hello_mpi",
+      "cwd": "/home/gauravgokhale/.config/nvim/scripts_tmpi/tmpi_trial",
       "stopAtEntry": true,
       "setupCommands": [
         {

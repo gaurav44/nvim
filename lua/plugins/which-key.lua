@@ -291,6 +291,41 @@ return {
 					end,
 					desc = "🛑 Terminate Debug",
 				},
+				{
+					"<leader>dfs",
+					function()
+					  require("dapui").float_element("scopes", { width = 60, height = 15, enter = true })
+					end,
+					desc = "🪟 Toggle Scopes Float",
+				},
+				{
+					"<leader>dfk",
+					function()
+					  require("dapui").float_element("stacks", { width = 60, height = 15, enter = true })
+					end,
+					desc = "📚 Toggle Call Stack Float",
+				},
+				{
+					"<leader>dfb",
+					function()
+					  require("dapui").float_element("breakpoints", { width = 60, height = 15, enter = true })
+					end,
+					desc = "🎯 Toggle Breakpoints Float",
+				},
+				{
+					"<leader>dfr",
+					function()
+					  require("dapui").float_element("repl", { width = 80, height = 20, enter = true })
+					end,
+					desc = "💬 Toggle REPL Float",
+				},
+				{
+					"<leader>dfc",
+					function()
+					  require("dapui").float_element("console", { width = 80, height = 20, enter = true })
+					end,
+					desc = "🖥️ Toggle Console Float",
+				},
 
 				-- Git mappings
 				{ "<leader>G", group = "🔄 Git" },

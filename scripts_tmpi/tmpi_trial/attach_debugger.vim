@@ -2,7 +2,7 @@
 if has('nvim')
   " Attach to the MPI process using nvim-dap
   lua << EOF
-  local pid = 645129
+  local pid = 13173
   print("Attaching to MPI process with PID: " .. pid)
   
   -- Use the existing Neovim DAP setup
@@ -14,7 +14,7 @@ if has('nvim')
   end
   
   -- Load the debug configuration
-  local config_file = io.open("/home/gaurav/Desktop/trials/tmpi_trial/debug_config.json", "r")
+  local config_file = io.open("/home/gauravgokhale/.config/nvim/scripts_tmpi/tmpi_trial/debug_config.json", "r")
   if not config_file then
     print("ERROR: Could not open debug configuration file")
     return
@@ -42,28 +42,3 @@ EOF
 else
   echo "This script requires Neovim"
 endif
-
-" Create commands to modify the volatile int debug flag
-command! -nargs=1 SetDebugFlag lua require('dap').eval('debug_flag = <args>')
-command! ContinueDebug lua require('dap').eval('debug_flag = 1')
-command! PauseDebug lua require('dap').eval('debug_flag = 0')
-
-" Automatically toggle the DAP UI when starting
-lua << EOF
-vim.defer_fn(function()
-  -- Execute the DAP UI toggle command (equivalent to <leader>du)
-  vim.cmd('lua require("dapui").toggle()')
-  print("DAP UI automatically toggled")
-end, 1000)
-EOF
-
-" Print instructions for using the commands
-lua << EOF
-print("----------------------------------------------------------------")
-print("DEBUGGING INSTRUCTIONS:")
-print("After the debugger attaches, you can use the following commands:")
-print("  :SetDebugFlag 1    # Set debug flag to specific value")
-print("  :ContinueDebug     # Set flag to 1 to continue execution")
-print("  :PauseDebug        # Set flag to 0 to pause at next checkpoint")
-print("----------------------------------------------------------------")
-EOF
