@@ -25,66 +25,26 @@ return {
       dap.adapters.cppdbg = {
         id = 'cppdbg',
         type = 'executable',
-        command = '/home/gauravgokhale/cppdbg/extension/debugAdapters/bin/OpenDebugAD7',
+        command = '/home/gaurav/cpptools/extension/debugAdapters/bin/OpenDebugAD7',
       }
 
-      -- Configuration for launching MPI program (rank 0)
       dap.configurations.cpp = {
         {
-          name = "MPI Debug DAP Attach",
+          name = "Launch",
           type = "cppdbg",
           request = "launch",
-          program = "/home/gaurav/Desktop/trials/tmpi_trial/hello_mpi", -- Update path to your program
-          args = { }, -- Add any program arguments here
-          cwd = "/home/gaurav/Desktop/trials/tmpi_trial/",
-          stopAtEntry = true,
-          externalConsole = false,
-          MIMode = "gdb",
-          miDebuggerArgs = "",
-          setupCommands = {
-            {
-              text = "-enable-pretty-printing",
-              description = "enable pretty printing",
-              ignoreFailures = false
-            },
-          },
-        },
-
-        -- Configuration for attaching to other MPI ranks
-        {
-          name = "MPI Attach",
-          type = "cppdbg",
-          request = "attach",
-          processId = "${command:pickProcess}",
-          program = "/home/gaurav/Desktop/trials/tmpi_trial/hello_mpi", -- Update path to your program
-          cwd = "/home/gaurav/Desktop/trials/tmpi_trial/",
-          MIMode = "gdb",
-          stopAtEntry = true,
-          setupCommands = {
-            {
-              text = "-enable-pretty-printing",
-              description = "enable pretty printing",
-              ignoreFailures = false
-            },
-          },
+          program = debug_config.program or function()
+            return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+          end,
+          args = debug_config.args or {},
+          cwd = debug_config.cwd or "${workspaceFolder}",
+          stopOnEntry = false,
+          runInTerminal = false
         }
       }
+
       -- Add the same configurations for C
       dap.configurations.c = dap.configurations.cpp
-      -- dap.configurations.cpp = {
-      --   {
-      --     name = "Launch",
-      --     type = "cppdbg",  -- Changed to match adapter name
-      --     request = "launch",
-      --     program = debug_config.program or function()
-      --       return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
-      --     end,
-      --     args = debug_config.args or {},
-      --     cwd = debug_config.cwd or "${workspaceFolder}",
-      --     stopOnEntry = false,
-      --     runInTerminal = false
-      --   }
-      -- }
 
       -- DAP UI Setup
       dapui.setup()
@@ -100,18 +60,6 @@ return {
       dap.listeners.before.event_exited["dapui_config"] = function()
         dapui.close()
       end
-
-      -- Keybindings for Debugging (commented out as they're now in which-key.nvim)
-      -- vim.keymap.set("n", "<F5>", dap.continue, { desc = "Start/Continue Debugging" })
-      -- vim.keymap.set("n", "<F10>", dap.step_over, { desc = "Step Over" })
-      -- vim.keymap.set("n", "<F11>", dap.step_into, { desc = "Step Into" })
-      -- vim.keymap.set("n", "<F12>", dap.step_out, { desc = "Step Out" })
-      -- vim.keymap.set("n", "<Leader>db", dap.toggle_breakpoint, { desc = "Toggle Breakpoint" })
-      -- vim.keymap.set("n", "<Leader>dc", function()
-      --   dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
-      -- end, { desc = "Set Conditional Breakpoint" })
-      -- vim.keymap.set("n", "<Leader>dr", dap.repl.open, { desc = "Open Debug REPL" })
-      -- vim.keymap.set("n", "<Leader>du", dapui.toggle, { desc = "Toggle Debug UI" })
     end
   }
 }

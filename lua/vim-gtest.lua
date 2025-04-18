@@ -1,19 +1,38 @@
 local M = {}
 
+M.config = {
+  gtest_build_dir = "build/test/",
+  test_run_dir = "test/aspherix-letters/data",
+}
 M.gtest_executable = nil
-M.test_cases = nil
 
-local Terminal = require("toggleterm.terminal").Terminal
+-- Telescope dependencies
 local pickers = require("telescope.pickers")
 local finders = require("telescope.finders")
 local sorters = require("telescope.sorters")
 local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
 
-function M.find_gtest_executable()
-  local base_dir = "build/test/"
-  local patterns = { "*_test", "*_tests" }
+function M.configure()
+  vim.ui.input({ prompt = "GTest build directory: ", default = M.config.gtest_build_dir }, function(input1)
+    if input1 and input1 ~= "" then
+      M.config.gtest_build_dir = input1
+    end
+    vim.ui.input({ prompt = "Test run directory: ", default = M.config.test_run_dir }, function(input2)
+      if input2 and input2 ~= "" then
+        M.config.test_run_dir = input2
+      end
+      print("GTest config updated:")
+      print("  build dir: " .. M.config.gtest_build_dir)
+      print("  run dir:   " .. M.config.test_run_dir)
+    end)
+  end)
+end
 
+-- Helper: Find GTest executable
+function M.find_gtest_executable()
+  local base_dir = M.config.gtest_build_dir
+  local patterns = { "*_test", "*_tests" }
   for _, pattern in ipairs(patterns) do
     for _, file in ipairs(vim.fn.glob(base_dir .. pattern, true, true)) do
       if vim.fn.filereadable(file) then
@@ -23,239 +42,112 @@ function M.find_gtest_executable()
       end
     end
   end
-
   print("No GTest executable found in " .. base_dir)
 end
 
-function M.run_test(test_filter)
-  if not M.gtest_executable then
-    print("No test executable detected. Run gtest.detect_executable() first.")
-    return
-  end
-
-  local original_dir = vim.fn.getcwd() -- Store the original working directory
-  local test_dir = "test/aspherix-letters/data"
-  local cmd = M.gtest_executable
-
-  if test_filter then
-    cmd = cmd .. " --gtest_filter=" .. test_filter
-    
-    -- Check if a shell pane exists
-    local check_pane = io.popen(
+-- Helper: Run a shell command in tmux (reuse for all test runs)
+local function run_in_tmux(test_dir, cmd, original_dir)
+  local check_pane = io.popen(
     'tmux list-panes -F "#{pane_current_command}" | grep -q "zsh\\|bash\\|fish" && echo "exists"')
-    local pane_exists = check_pane:read("*a")
-    check_pane:close()
-
-    if pane_exists:match("exists") then
-      -- Send command to the existing shell pane with cd back to original directory
-      vim.cmd(string.format(
-        'silent !tmux send-keys -t "{last}" "cd %s && %s && cd %s" Enter && cd -', 
-        test_dir, 
-        cmd, 
-        vim.fn.shellescape(original_dir)
-      ))
-    else
-      -- Create a new split and run the command with cd back to original directory
-      vim.cmd(string.format(
-        'silent !tmux split-window -h "cd %s && %s && cd %s; exec $SHELL"', 
-        test_dir, 
-        cmd, 
-        vim.fn.shellescape(original_dir)
-      ))
-    end
+  local pane_exists = check_pane:read("*a")
+  check_pane:close()
+  if pane_exists:match("exists") then
+    vim.cmd(string.format(
+      'silent !tmux send-keys -t "{last}" "cd %s && %s && cd %s" Enter && cd -',
+      test_dir, cmd, vim.fn.shellescape(original_dir)
+    ))
   else
-    print("No test_filter set!!!!")
-    return
+    vim.cmd(string.format(
+      'silent !tmux split-window -h "cd %s && %s && cd %s; exec $SHELL"',
+      test_dir, cmd, vim.fn.shellescape(original_dir)
+    ))
   end
-
-  print("Running test: " .. cmd)
 end
 
-function M.run_all_tests_except_debug()
+-- Helper: Get all test cases (optionally filter for debug/non-debug)
+local function get_gtest_cases(filter)
   if not M.gtest_executable then
-    print("No test executable detected. Run gtest.detect_executable() first.")
-    return
+    print("GTest executable is not set. Use :GTestDetect to set it.")
+    return {}
   end
-
-  local original_dir = vim.fn.getcwd() -- Store the original working directory
-  local test_dir = "test/aspherix-letters/data"
-  
-  -- Get all test cases
   local handle = io.popen(M.gtest_executable .. " --gtest_list_tests")
   if not handle then
     print("Failed to run GTest executable.")
-    return
+    return {}
   end
-
   local output = handle:read("*a")
   handle:close()
-
-  local test_cases = {}
-  local current_suite = nil
+  local test_cases, current_suite = {}, nil
   for line in output:gmatch("[^\r\n]+") do
     if line:match("%s") then
       local test_case = line:match("^%s*(%S+)")
       if current_suite and test_case then
-        local full_test_name = current_suite .. test_case
-        -- Exclude tests with 'debug' (case-insensitive)
-        if not full_test_name:lower():match("debug") then
-          table.insert(test_cases, full_test_name)
+        local full = current_suite .. test_case
+        if not filter or filter(full) then
+          table.insert(test_cases, full)
         end
       end
     else
       current_suite = line
     end
   end
-
-  -- Create filter string by joining non-debug test cases
-  local test_filter = table.concat(test_cases, ":")
-  local cmd = M.gtest_executable .. " --gtest_filter=" .. test_filter
-
-  -- Check if a shell pane exists
-  local check_pane = io.popen(
-  'tmux list-panes -F "#{pane_current_command}" | grep -q "zsh\\|bash\\|fish" && echo "exists"')
-  local pane_exists = check_pane:read("*a")
-  check_pane:close()
-
-  if pane_exists:match("exists") then
-    -- Send command to the existing shell pane with cd back to original directory
-    vim.cmd(string.format(
-      'silent !tmux send-keys -t "{last}" "cd %s && %s && cd %s" Enter && cd -', 
-      test_dir, 
-      cmd, 
-      vim.fn.shellescape(original_dir)
-    ))
-  else
-    -- Create a new split and run the command with cd back to original directory
-    vim.cmd(string.format(
-      'silent !tmux split-window -h "cd %s && %s && cd %s; exec $SHELL"', 
-      test_dir, 
-      cmd, 
-      vim.fn.shellescape(original_dir)
-    ))
-  end
-
-  print("Running all tests except debug tests")
-  print("Total non-debug test cases: " .. #test_cases)
-end
-
-function M.run_only_debug_tests()
-  if not M.gtest_executable then
-    print("No test executable detected. Run gtest.detect_executable() first.")
-    return
-  end
-
-  local original_dir = vim.fn.getcwd() -- Store the original working directory
-  local test_dir = "test/aspherix-letters/data"
-  
-  -- Get all test cases
-  local handle = io.popen(M.gtest_executable .. " --gtest_list_tests")
-  if not handle then
-    print("Failed to run GTest executable.")
-    return
-  end
-
-  local output = handle:read("*a")
-  handle:close()
-
-  local debug_test_cases = {}
-  local current_suite = nil
-  for line in output:gmatch("[^\r\n]+") do
-    if line:match("%s") then
-      local test_case = line:match("^%s*(%S+)")
-      if current_suite and test_case then
-        local full_test_name = current_suite .. test_case
-        -- Include only tests with 'debug' (case-insensitive)
-        if full_test_name:lower():match("debug") then
-          table.insert(debug_test_cases, full_test_name)
-        end
-      end
-    else
-      current_suite = line
-    end
-  end
-
-  -- If no debug tests found, print a message
-  if #debug_test_cases == 0 then
-    print("No debug tests found.")
-    return
-  end
-
-  -- Create filter string by joining debug test cases
-  local test_filter = table.concat(debug_test_cases, ":")
-  local cmd = M.gtest_executable .. " --gtest_filter=" .. test_filter
-
-  -- Check if a shell pane exists
-  local check_pane = io.popen(
-  'tmux list-panes -F "#{pane_current_command}" | grep -q "zsh\\|bash\\|fish" && echo "exists"')
-  local pane_exists = check_pane:read("*a")
-  check_pane:close()
-
-  if pane_exists:match("exists") then
-    -- Send command to the existing shell pane with cd back to original directory
-    vim.cmd(string.format(
-      'silent !tmux send-keys -t "{last}" "cd %s && %s && cd %s" Enter && cd -', 
-      test_dir, 
-      cmd, 
-      vim.fn.shellescape(original_dir)
-    ))
-  else
-    -- Create a new split and run the command with cd back to original directory
-    vim.cmd(string.format(
-      'silent !tmux split-window -h "cd %s && %s && cd %s; exec $SHELL"', 
-      test_dir, 
-      cmd, 
-      vim.fn.shellescape(original_dir)
-    ))
-  end
-
-  print("Running only debug tests")
-  print("Total debug test cases: " .. #debug_test_cases)
-end
-
--- Test Case Selection (Telescope)
-local function get_gtest_cases()
-  if not M.gtest_executable then
-    print("GTest executable is not set. Use :GTestSetCommand to set it.")
-    return {}
-  end
-
-  local handle = io.popen(M.gtest_executable .. " --gtest_list_tests")
-  if not handle then
-    print("Failed to run GTest executable.")
-    return {}
-  end
-
-  local output = handle:read("*a")
-  handle:close()
-
-  local test_cases = {}
-  local current_suite = nil
-  for line in output:gmatch("[^\r\n]+") do
-    if line:match("%s") then
-      local test_case = line:match("^%s*(%S+)")
-      if current_suite and test_case then
-        table.insert(test_cases, current_suite .. test_case)
-      end
-    else
-      current_suite = line
-    end
-  end
-
   return test_cases
 end
 
--- Fuzzy Select Test Case
-function M.fuzzy_select_gtest_case()
-  local test_cases = get_gtest_cases()
-  print("Fuzzy select GTest case called.") -- Debug statement
-
-  if #test_cases == 0 then
-    print("No test cases found. Ensure GTestCmd is set and executable.")
+-- Run a single test
+function M.run_test(test_filter)
+  if not M.gtest_executable then
+    print("No test executable detected. Run :GTestDetect first.")
     return
   end
-  print("Fuzzy select GTest case called.") -- Debug statement
+  if not test_filter then
+    print("No test_filter set!")
+    return
+  end
+  local original_dir = vim.fn.getcwd()
+  local test_dir = M.config.test_run_dir
+  local cmd = M.gtest_executable .. " --gtest_filter=" .. test_filter
+  run_in_tmux(test_dir, cmd, original_dir)
+  print("Running test: " .. cmd)
+end
 
+-- Run all tests except debug
+function M.run_all_tests_except_debug()
+  local cases = get_gtest_cases(function(name)
+    return not name:lower():match("debug")
+  end)
+  if #cases == 0 then
+    print("No non-debug test cases found.")
+    return
+  end
+  local filter = table.concat(cases, ":")
+  M.run_test(filter)
+  print("Running all tests except debug tests")
+  print("Total non-debug test cases: " .. #cases)
+end
+
+-- Run only debug tests
+function M.run_only_debug_tests()
+  local cases = get_gtest_cases(function(name)
+    return name:lower():match("debug")
+  end)
+  if #cases == 0 then
+    print("No debug tests found.")
+    return
+  end
+  local filter = table.concat(cases, ":")
+  M.run_test(filter)
+  print("Running only debug tests")
+  print("Total debug test cases: " .. #cases)
+end
+
+-- Telescope fuzzy select
+function M.fuzzy_select_gtest_case()
+  local test_cases = get_gtest_cases()
+  if #test_cases == 0 then
+    print("No test cases found. Ensure GTest executable is set.")
+    return
+  end
   pickers.new({}, {
     prompt_title = "Select GTest Case",
     finder = finders.new_table({ results = test_cases }),
@@ -264,9 +156,8 @@ function M.fuzzy_select_gtest_case()
       actions.select_default:replace(function()
         actions.close(prompt_bufnr)
         local selection = action_state.get_selected_entry()
-        if selection and selection.value then              -- Access the correct value
-          print("Selected test case: " .. selection.value) -- Debug statement
-          M.run_test(selection[1])                         -- Pass the selected value
+        if selection and selection.value then
+          M.run_test(selection.value)
         else
           print("No test case selected.")
         end
@@ -276,16 +167,16 @@ function M.fuzzy_select_gtest_case()
   }):find()
 end
 
+-- Setup user commands
 function M.setup()
+  vim.api.nvim_create_user_command("GTestConfig", M.configure, {})
   vim.api.nvim_create_user_command("GTestDetect", M.find_gtest_executable, {})
-  vim.api.nvim_create_user_command("GTestRun", M.run_test, {})
-  vim.api.nvim_create_user_command('GTestFuzzyFind', M.fuzzy_select_gtest_case, {})
-  vim.api.nvim_create_user_command('GTestRunAllExceptDebug', M.run_all_tests_except_debug, {})
-  vim.api.nvim_create_user_command('GTestRunOnlyDebug', M.run_only_debug_tests, {})
-  -- Keybindings (commented out as they're now in which-key.nvim)
-  -- vim.keymap.set('n', '<leader>tc', ":GTestFuzzyFind<CR>", { desc = "Select GTest Case" })
-  -- vim.keymap.set('n', '<leader>ta', ":GTestRunAllExceptDebug<CR>", { desc = "Run All Tests Except Debug" })
-  -- vim.keymap.set('n', '<leader>td', ":GTestRunOnlyDebug<CR>", { desc = "Run Only Debug Tests" })
+  vim.api.nvim_create_user_command("GTestRun", function(opts)
+    M.run_test(opts.args)
+  end, { nargs = 1, desc = "Run a specific GTest by filter" })
+  vim.api.nvim_create_user_command("GTestFuzzyFind", M.fuzzy_select_gtest_case, {})
+  vim.api.nvim_create_user_command("GTestRunAllExceptDebug", M.run_all_tests_except_debug, {})
+  vim.api.nvim_create_user_command("GTestRunOnlyDebug", M.run_only_debug_tests, {})
 end
 
 return M

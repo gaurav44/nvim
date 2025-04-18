@@ -58,4 +58,20 @@ function M.attach_to_mpi_process(pid, program, cwd)
   end
 end
 
+function M.setup()
+  vim.api.nvim_create_user_command("MPIDebug", function(opts)
+    local args = vim.split(opts.args, " ")
+    local pid = tonumber(args[1])
+    local program = args[2]
+    local cwd = args[3]
+    
+    if not pid then
+      vim.notify("Please provide a valid PID", vim.log.levels.ERROR)
+      return
+    end
+    
+    require("mpi_debug").attach_to_mpi_process(pid, program, cwd)
+  end, { nargs = "*", desc = "Attach debugger to MPI process with optional program path and working directory" })
+end
+
 return M

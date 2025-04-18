@@ -5,17 +5,6 @@ return {
     dependencies = { 'nvim-lua/plenary.nvim' },
     config = function()
       local builtin = require('telescope.builtin')
-      -- Keybindings commented out as they're now in which-key.nvim
-      -- vim.keymap.set('n', '<leader>ff', builtin.find_files, {})
-      -- vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
-      -- vim.keymap.set('n', '<leader>fs', builtin.grep_string, {})
-      -- vim.keymap.set('n', '<leader>tf',
-      --   function()
-      --     builtin.lsp_document_symbols({ symbols = { "function","method" } })
-      --   end, {})
-      -- vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
-      -- vim.keymap.set('n', '<leader>bn', ':bnext<CR>', {})
-      -- vim.keymap.set('n', '<leader>bp', ':bprevious<CR>', {})
     end
   },
   {

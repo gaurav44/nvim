@@ -105,8 +105,5 @@ return {
           },
         }
       })
-      
-      -- Add keymaps for outline.nvim (commented out as it's now in which-key.nvim)
-      -- vim.keymap.set("n", "<leader>o", "<cmd>Outline<cr>", { desc = "Toggle Outline" })
     end,
   }

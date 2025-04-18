@@ -143,53 +143,5 @@ return {
         end
       end, {})
     end,
-    keys = {
-      -- All keybindings converted to <leader>a format
-      { "<leader>zc", "<cmd>CopilotChat<cr>", desc = "CopilotChat - Chat with copilot" },
-      { "<leader>ze", "<cmd>CopilotChatExplain<cr>", desc = "CopilotChat - Explain code" },
-      { "<leader>zr", "<cmd>CopilotChatReview<cr>", desc = "CopilotChat - Review code" },
-      { "<leader>zf", "<cmd>CopilotChatFix<cr>", desc = "CopilotChat - Fix code issue" },
-      { "<leader>zo", "<cmd>CopilotChatOptimize<cr>", mode = "v", desc = "CopilotChat - Optimize code" },
-      { "<leader>zd", "<cmd>CopilotChatDocs<cr>", mode = "v", desc = "CopilotChat - Generate Docs" },
-      { "<leader>zt", "<cmd>CopilotChatTests<cr>", desc = "CopilotChat - Generate tests" },
-      { "<leader>zj", "<cmd>CopilotChatCommit<cr>", mode = "n", desc = "CopilotChat - Generate Commit Message" },
-      { "<leader>zJ", "<cmd>CopilotChatCommit<cr>", mode = "v", desc = "CopilotChat - Generate Commit Message for Selection" },
-      { "<leader>zT", "<cmd>CopilotTutor<cr>", desc = "Copilot Tutor - Ask about motions or commands" },
-      
-      -- New keybindings from the first configuration
-      { "<leader>ap", function() 
-          require("CopilotChat").select_prompt({ context = { "buffers" } }) 
-        end, 
-        desc = "CopilotChat - Prompt actions" 
-      },
-      { "<leader>ap", function() 
-          require("CopilotChat").select_prompt() 
-        end, 
-        mode = "x", 
-        desc = "CopilotChat - Prompt actions" 
-      },
-      { "<leader>zR", "<cmd>CopilotChatRefactor<cr>", desc = "CopilotChat - Refactor code" },
-      { "<leader>zn", "<cmd>CopilotChatBetterNamings<cr>", desc = "CopilotChat - Better Naming" },
-      { "<leader>zv", ":CopilotChatVisual", mode = "x", desc = "CopilotChat - Open in vertical split" },
-      { "<leader>zx", ":CopilotChatInline", mode = "x", desc = "CopilotChat - Inline chat" },
-      { "<leader>zi", function()
-          local input = vim.fn.input("Ask Copilot: ")
-          if input ~= "" then vim.cmd("CopilotChat " .. input) end
-        end, 
-        desc = "CopilotChat - Ask input" 
-      },
-      { "<leader>am", "<cmd>CopilotChatCommit<cr>", desc = "CopilotChat - Generate commit message for all changes" },
-      { "<leader>aq", function()
-          local input = vim.fn.input("Quick Chat: ")
-          if input ~= "" then vim.cmd("CopilotChatBuffer " .. input) end
-        end, 
-        desc = "CopilotChat - Quick chat" 
-      },
-      { "<leader>zE", "<cmd>CopilotChatFixError<cr>", desc = "CopilotChat - Fix Diagnostic" },
-      { "<leader>zl", "<cmd>CopilotChatReset<cr>", desc = "CopilotChat - Clear buffer and chat history" },
-      { "<leader>zV", "<cmd>CopilotChatToggle<cr>", desc = "CopilotChat - Toggle" },
-      { "<leader>z?", "<cmd>CopilotChatModels<cr>", desc = "CopilotChat - Select Models" },
-      { "<leader>za", "<cmd>CopilotChatAgents<cr>", desc = "CopilotChat - Select Agents" },
-    },
   },
 }
