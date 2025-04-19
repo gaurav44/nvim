@@ -1,0 +1,32 @@
+{
+  "configurations": [
+    {
+      "type": "cppdbg",
+      "request": "attach",
+      "name": "MPI debug attach",
+      "program": "/home/gaurav/.config/nvim/tmpi_trial/hello_mpi",
+      "processId": "{command:pickProcess}",
+      "args": [],
+      "cwd": "/home/gaurav/.config/nvim/tmpi_trial",
+      "stopAtEntry": true,
+      "environment": [],
+      "externalConsole": false,
+      "sourceFile": "/home/gaurav/.config/nvim/tmpi_trial/hello_mpi.cpp",
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "executableName",
+      "description": "Name of your executable"
+    }
+  ]
+}
