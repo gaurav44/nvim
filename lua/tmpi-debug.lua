@@ -1,13 +1,13 @@
 local M = {}
 
 -- Get launch configurations from launch.json
-local function get_launch_configurations(path)
+local function get_launch_configurations()
     local status_ok, vscode = pcall(require, 'dap.ext.vscode')
     if not status_ok then
         print("Error: dap.ext.vscode not found. Ensure nvim-dap is installed.")
         return nil
     end
-    return vscode.getconfigs(path)
+    return vscode.getconfigs()
 end
 
 -- Attach to an MPI process
