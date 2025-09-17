@@ -106,6 +106,7 @@ return {
 				{ "<leader>gr", function() vim.lsp.buf.references() end, desc = "🔗 Find References" },
 				{ "<leader>gk", function() vim.diagnostic.open_float() end, desc = "🔍 Show Diagnostic in Float" },
 				{ "<leader>gs", function() require("telescope.builtin").lsp_document_symbols() end, desc = "🔠 Document Symbols" },
+				{ "<leader>gS", function() require("telescope.builtin").lsp_dynamic_workspace_symbols() end, desc = "🔠 Global Symbols" },
 				{ "<leader>ga", function() vim.lsp.buf.code_action() end, desc = "💡 Code Action" },
 				{ "<leader>gf", function() vim.lsp.buf.format() end, desc = "✨ Format Document" },
 				{ "<leader>gK", function() vim.lsp.buf.hover() end, desc = "📖 Show Hover" },
