@@ -57,3 +57,14 @@ vim.filetype.add({
     asx = "asx",
   },
 })
+
+vim.opt.runtimepath:append("/home/gaurav/.config/nvim/git-compare.nvim")
+require("git-compare").setup()
+
+vim.keymap.set("n", "<leader>ma", "mA", { desc = "Set global mark A" })
+vim.keymap.set("n", "<leader>mb", "mB", { desc = "Set global mark B" })
+vim.keymap.set("n", "<leader>mc", "mC", { desc = "Set global mark C" })
+
+vim.keymap.set("n", "<leader>ja", "`A", { desc = "Jump to global mark A" })
+vim.keymap.set("n", "<leader>jb", "`B", { desc = "Jump to global mark B" })
+vim.keymap.set("n", "<leader>jc", "`C", { desc = "Jump to global mark C" })

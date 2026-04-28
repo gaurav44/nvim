@@ -169,7 +169,7 @@ return {
 				{ "<leader>zl", "<cmd>CopilotChatReset<cr>", desc = "CopilotChat - Clear buffer and chat history" },
 				{ "<leader>zV", "<cmd>CopilotChatToggle<cr>", desc = "CopilotChat - Toggle" },
 				{ "<leader>z?", "<cmd>CopilotChatModels<cr>", desc = "CopilotChat - Select Models" },
-				{ "<leader>za", "<cmd>CopilotChatAgents<cr>", desc = "CopilotChat - Select Agents" },
+				-- { "<leader>za", "<cmd>CopilotChatAgents<cr>", desc = "CopilotChat - Select Agents" },
 
 				--Buffers
 				{ "<leader>b", group = "📑 Buffers", expand = function() return require("which-key.extras").expand.buf() end },
