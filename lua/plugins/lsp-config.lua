@@ -9,28 +9,29 @@ return {
     "williamboman/mason-lspconfig.nvim",
     config = function()
       require("mason-lspconfig").setup({
-        ensure_installed = { "lua_ls", "clangd", "cmake" },  -- Add "cmake" here
+        ensure_installed = { "lua_ls", "clangd" },
+        automatic_enable = false,
       })
     end,
   },
   {
     "neovim/nvim-lspconfig",
     config = function()
-      local lspconfig = require("lspconfig")
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
-      capabilities.offsetEncoding = {"utf-8"}
-      lspconfig.lua_ls.setup({
+      capabilities.offsetEncoding = { "utf-8" }
+
+      vim.lsp.config("lua_ls", {
         capabilities = capabilities,
       })
-      lspconfig.clangd.setup({
+      vim.lsp.config("clangd", {
         capabilities = capabilities,
-        cmd = {"clangd", "--clang-tidy", "--enable-config"},
+        cmd = { "clangd", "--clang-tidy", "--enable-config" },
+      })
+      vim.lsp.config("cmake", {
+        capabilities = capabilities,
       })
 
-      -- Add CMake language server configuration
-      lspconfig.cmake.setup({
-        capabilities = capabilities,
-      })
+      vim.lsp.enable({ "lua_ls", "clangd", "cmake" })
 
       vim.diagnostic.config({
         virtual_text = false,

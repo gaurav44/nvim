@@ -10,7 +10,6 @@ return {
     config = function()
       local dap = require("dap")
       local dapui = require("dapui")
-      local json = require("lunajson")
 
       local function get_launch_configurations()
         local status_ok, vscode = pcall(require, 'dap.ext.vscode')
@@ -25,7 +24,7 @@ return {
       dap.adapters.cppdbg = {
         id = 'cppdbg',
         type = 'executable',
-        command = '/home/gaurav/cpptools/extension/debugAdapters/bin/OpenDebugAD7',
+        command = vim.fn.expand('~/cpptools/extension/debugAdapters/bin/OpenDebugAD7'),
       }
 
       dap.configurations.cpp = get_launch_configurations()
@@ -133,4 +132,3 @@ return {
     end
   }
 }
-

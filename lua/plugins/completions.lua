@@ -8,6 +8,19 @@ return {
   		"saadparwaiz1/cmp_luasnip",
   		"rafamadriz/friendly-snippets",
   	},
+	config = function()
+		local luasnip = require("luasnip")
+
+		luasnip.add_snippets("cpp", require("snippets"))
+
+		vim.keymap.set({ "i", "s" }, "<C-k>", function()
+			luasnip.expand_or_jump()
+		end, { silent = true, desc = "Expand or jump forward in snippet" })
+
+		vim.keymap.set({ "i", "s" }, "<C-j>", function()
+			luasnip.jump(-1)
+		end, { silent = true, desc = "Jump backward in snippet" })
+	end,
   },
   {
   	"hrsh7th/nvim-cmp",
